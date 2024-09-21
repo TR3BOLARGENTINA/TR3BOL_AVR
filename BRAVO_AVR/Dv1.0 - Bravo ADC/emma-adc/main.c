@@ -16,7 +16,7 @@
 // típica 2.4 Mohm (depende de la frecuencia de funcionamiento). Para otro ADC, 
 // o intercalando seguidores de tensión en Vin+ y Vin-, puede variar.
 
-#define nCS 0
+#define nCS 1
 #define SCK (1<<5)
 #define MISO (PINB&(1<<4))
 #define SCKlow (PORTB&=~SCK)
