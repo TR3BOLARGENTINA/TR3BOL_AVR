@@ -97,11 +97,9 @@ int main(void)
     while (1) 
     {
 		valADC = leeAD_MCP3550();
-		//valADC = valADC + 33000;
 		if(valADC!=-1)
 		{
-			valADC += 33000;
-			sprintf(TxBuff,"AD:%ld\t volts:%.1f\r\n", valADC,((float)valADC)*VREF/CMAX);
+			sprintf(TxBuff,"AD:%ld\t\t Tensión: \t%.2f V\r\n", valADC,((float)valADC)*VREF/CMAX);
 			mi_puts(TxBuff);
 		}
 		_delay_ms(100);
