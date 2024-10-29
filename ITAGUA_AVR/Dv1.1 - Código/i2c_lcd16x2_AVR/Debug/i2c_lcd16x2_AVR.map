@@ -1663,27 +1663,27 @@ END GROUP
  .debug_frame   0x00000fe0      0x134 uart.o
  .debug_frame   0x00001114       0x60 wd.o
 
-.debug_str      0x00000000     0x17b0
+.debug_str      0x00000000     0x1784
  *(.debug_str)
  .debug_str     0x00000000      0x208 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr5/crtatmega328p.o
- .debug_str     0x00000208      0xdf2 app_utils.o
-                                0xe9e (size before relaxing)
- .debug_str     0x00000ffa       0x3b i2c_restore.o
-                                0x256 (size before relaxing)
- .debug_str     0x00001035      0x157 lcdpcf8574.o
-                                0x43a (size before relaxing)
- .debug_str     0x0000118c      0x399 main.o
-                                0xb73 (size before relaxing)
- .debug_str     0x00001525       0x68 pcf8574.o
-                                0x347 (size before relaxing)
- .debug_str     0x0000158d       0x48 twimaster.o
-                                0x284 (size before relaxing)
- .debug_str     0x000015d5      0x129 RTC_hal.o
-                                0x732 (size before relaxing)
- .debug_str     0x000016fe       0x95 uart.o
-                                0x733 (size before relaxing)
- .debug_str     0x00001793       0x1d wd.o
-                                0x1d3 (size before relaxing)
+ .debug_str     0x00000208      0xdc6 app_utils.o
+                                0xe72 (size before relaxing)
+ .debug_str     0x00000fce       0x3b i2c_restore.o
+                                0x22a (size before relaxing)
+ .debug_str     0x00001009      0x157 lcdpcf8574.o
+                                0x40e (size before relaxing)
+ .debug_str     0x00001160      0x399 main.o
+                                0xb47 (size before relaxing)
+ .debug_str     0x000014f9       0x68 pcf8574.o
+                                0x31b (size before relaxing)
+ .debug_str     0x00001561       0x48 twimaster.o
+                                0x258 (size before relaxing)
+ .debug_str     0x000015a9      0x129 RTC_hal.o
+                                0x706 (size before relaxing)
+ .debug_str     0x000016d2       0x95 uart.o
+                                0x707 (size before relaxing)
+ .debug_str     0x00001767       0x1d wd.o
+                                0x1a7 (size before relaxing)
 
 .debug_loc      0x00000000     0x6e7b
  *(.debug_loc)
