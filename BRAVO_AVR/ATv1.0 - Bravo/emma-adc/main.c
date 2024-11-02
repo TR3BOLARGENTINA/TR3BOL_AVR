@@ -10,50 +10,19 @@
 #include <stdio.h>
 #define F_CPU 16000000
 #include <util/delay.h>
+
+#include "328p_interrupcionPorCambio.h"
+#include "app_utils.h"
+
 #define VREF 5.0
-#define CMAX 10411.99	//cuenta para 500 volts dividido 100. 
+//#define CMAX 10411.99	//cuenta para 500 volts dividido 100. 
+
 
 // Esto es con el circuito de proteus, que modela la impedancia del MCP3553, 
 // típica 2.4 Mohm (depende de la frecuencia de funcionamiento). Para otro ADC, 
 // o intercalando seguidores de tensión en Vin+ y Vin-, puede variar.
 
-#define pinCS   1
-#define pinMISO 4
-#define pinSCK  5
 
-#define CS_OFF  (PORTB &=~(1<<pinCS))
-#define CS_ON   (PORTB |= (1<<pinCS))
-#define CS_OUT  (DDRB |= (1<<pinCS))
-
-#define ifMISO   ( PINB   & (1<<pinMISO))
-
-#define SCK_OFF  ( PORTB &=~(1<<pinSCK) )
-#define SCK_ON   ( PORTB |= (1<<pinSCK))
-
-char TxBuff[20];
-
-void uart_init(uint32_t bps)
-{
-	UBRR0=F_CPU/16/bps-1;
-	UCSR0B|=(1<<TXEN0)|(1<<RXEN0);
-}
-
-void mi_putc(char dato)
-{
-	while(!(UCSR0A&(1<<UDRE0))){
-		_delay_us(1);
-	}
-	UDR0=dato;
-}
-
-void mi_puts(char *cadena)
-{
-	while(*cadena)
-	{
-		mi_putc(*cadena);
-		cadena++;
-	}
-}
 
 uint32_t leeAD_MCP3550(void)
 {
@@ -81,29 +50,193 @@ uint32_t leeAD_MCP3550(void)
 	}
 	return adcval;
 }
+//cuenta para 500 volts dividido 100.
+#define CMAX_n05	11300
+#define CMAX_n1		10750
+#define CMAX_n2		10538
+#define CMAX_n5		10705
+#define CMAX_n8		10638
+#define CMAX_n13	10696
+#define CMAX_n16	11659
+#define CMAX_n20	10676
+#define CMAX_n50	10671
+#define CMAX_n100	10676
+#define CMAX_n200	10713
+#define CMAX_n300	10760
+#define CMAX_n400	10835
+#define CMAX_n500	10850
 
 
-int main(void)
+#define CMAX_p05	13200
+#define CMAX_p1		11850
+#define CMAX_p2		11100
+#define CMAX_p5		10830
+#define CMAX_p8		10731
+#define CMAX_p13	10712
+#define CMAX_p16	10734
+#define CMAX_p20	10733
+#define CMAX_p50	10675
+#define CMAX_p100	10669
+#define CMAX_p200	10711
+#define CMAX_p300	10759
+#define CMAX_p400	10839
+#define CMAX_p500	10850
+
+int32_t valADC = 0;
+float Vread = 0.0;
+uint16_t CMAX = 1;
+void ADC_a_Volt()
 {
-	_delay_ms(500);
-    int32_t valADC;
-	CS_OUT;
-	DDRB |= (1<<pinSCK);
-	
-	uart_init(9600);
-	mi_puts("Hola\0");
-    while (1) 
-    {
+	if(valADC>0) 
+	{
+		if     (valADC>CMAX_p400) CMAX = CMAX_p500;
+		else if(valADC>CMAX_p300) CMAX = CMAX_p400;
+		else if(valADC>CMAX_p200) CMAX = CMAX_p300;
+		else if(valADC>CMAX_p100) CMAX = CMAX_p200;
+		else if(valADC>CMAX_p50)  CMAX = CMAX_p100;
+		else if(valADC>CMAX_p20)  CMAX = CMAX_p50;
+		else if(valADC>CMAX_p16)  CMAX = CMAX_p20;
+		else if(valADC>CMAX_p13)  CMAX = CMAX_p16;
+		else if(valADC>CMAX_p8)   CMAX = CMAX_p13;
+		else if(valADC>CMAX_p5)   CMAX = CMAX_p8;
+		else if(valADC>CMAX_p2)   CMAX = CMAX_p5;
+		else if(valADC>CMAX_p1)   CMAX = CMAX_p2;
+		else if(valADC>CMAX_p05)  CMAX = CMAX_p1;
+		else CMAX = CMAX_p05;
+	}
+	else         
+	{
+		if     (valADC>CMAX_n400) CMAX = CMAX_n500;
+		else if(valADC>CMAX_n300) CMAX = CMAX_n400;
+		else if(valADC>CMAX_n200) CMAX = CMAX_n300;
+		else if(valADC>CMAX_n100) CMAX = CMAX_n200;
+		else if(valADC>CMAX_n50)  CMAX = CMAX_n100;
+		else if(valADC>CMAX_n20)  CMAX = CMAX_n50;
+		else if(valADC>CMAX_n16)  CMAX = CMAX_n20;
+		else if(valADC>CMAX_n13)  CMAX = CMAX_n16;
+		else if(valADC>CMAX_n8)   CMAX = CMAX_n13;
+		else if(valADC>CMAX_n5)   CMAX = CMAX_n8;
+		else if(valADC>CMAX_n2)   CMAX = CMAX_n5;
+		else if(valADC>CMAX_n1)   CMAX = CMAX_n2;
+		else if(valADC>CMAX_n05)  CMAX = CMAX_n1;
+		else CMAX = CMAX_n05;
+	}
+	Vread = ((float)valADC)*VREF/CMAX; //escala negativa
+}
+
+void calibracion ()
+{
+	while (1)
+	{
+		wdt_reset();
 		valADC = leeAD_MCP3550();
 		if(valADC!=-1)
 		{
-			/*sprintf(TxBuff,"AD:%ld\t\t Tensión: \t%.2f V\r\n", valADC,((float)valADC)*VREF/CMAX);
-			mi_puts(TxBuff);
-			_delay_ms(100);*/
-			sprintf(TxBuff,":%.2f\r\n", ((float)valADC)*VREF/CMAX);
+			//valADC = valADC - 5420; //ajuste a 0 (error amplitud 30,  +-15)
+			sprintf(TxBuff,"AD: %ld\r\n", valADC);
 			mi_puts(TxBuff);
 		}
-		_delay_ms(500);
+		_delay_ms(100);
+	}
+}
+
+uint16_t numRegistro = 0;
+uint8_t numArchivo   = 0;
+uint8_t numLinea     = 0;
+uint8_t tryVolt = 0;
+void lecturaVoltimetro()
+{
+	valADC = leeAD_MCP3550();
+	if(valADC!=-1)
+	{
+		//------ Registro -------//
+		sprintf(TxBuff,"%d,%d,%d,", numRegistro++,numArchivo,numLinea);
+		mi_puts(TxBuff);
+		
+		//------ RTC -------//
+		leeRTC();
+
+		//------ Voltimetro -------//
+		ADC_a_Volt();
+		//sprintf(TxBuff,"AD: %ld\r\n", valADC);
+		//mi_puts(TxBuff);
+		
+		sprintf(TxBuff,",%.3fV\r\n", Vread);
+		mi_puts(TxBuff);
+	}
+}
+
+int main(void)
+{
+	/* Deshabilitación de Watchdog dentro de 15ms */
+	_delay_ms(5);
+	wdt_disable();
+	
+	/* Inicialización de Watchdog */
+	wdt_init();				//sin sei()!!
+	_delay_ms(500);
+	
+	/* Inicialización de PINES */
+	iniciaPines();			wdt_reset();
+	CS_OUT;
+	DDRB |= (1<<pinSCK);
+	
+	
+	/* Inicialización de VARIABLES */
+	iniciaVariables();		wdt_reset();
+	
+	/* Configura PULSADORES */
+	//configuraInterrupcionPorCambio();	wdt_reset();	//PB0/PCINT0 	-->	P1
+														//PD5/PCINT21	-->	P2
+														//PD4/PCINT20	-->	P3
+														//PD2/PCINT18	-->	P4
+    
+	
+	
+	/* Inicialización de UART */ 
+	configuraUART(myBaudRate, 1, 0);
+	//printf("UART OK\n");
+	//printf("\n");
+	
+	/* Inicialización de RTC */ 
+	TWSR &=~ (3<<TWPS0);
+	TWBR = 72;
+	//configuraRTC(); //TIENE QUE ESTAR COMENTADO SI YA ESTÁ CONFIGURADA LA FECHA Y HORA
+
+	_delay_ms(1000);
+	
+	
+	//CALIBRACIÓN VOLTÍMTREO
+	//calibracion();
+	
+	estado = s_reposo;
+	//sei();
+		
+    while (1) 
+    {
+		switch(estado)
+		{
+			case s_reposo:
+							wdt_reset();
+							lecturaVoltimetro();
+							miDelay_ms_reposo(1000);
+							break;
+		    case s_pulsadores:
+							wdt_reset();
+							rutinaPulsador();
+							if(estado == s_enviaVolt)
+							{
+								lecturaVoltimetro();
+							}
+							estado = s_reposo;
+							habilitaPulsadores();
+							sei();
+							break;
+			default:
+							wdt_reset();
+							break;
+		}
+		wdt_reset();
     }
 }
 

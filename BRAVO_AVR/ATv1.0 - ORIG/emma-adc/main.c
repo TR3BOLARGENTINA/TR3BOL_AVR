@@ -1,0 +1,121 @@
+/*
+ * emma-adc.c
+ *
+ * Created: 29/8/2024 22:03:38
+ * Author : TR3BOL-ADC
+ */ 
+
+#include <avr/io.h>
+#include <stdlib.h>
+#include <stdio.h>
+#define F_CPU 16000000
+#include <util/delay.h>
+#define VREF 5.0
+#define CMAX 10411.99	//cuenta para 500 volts dividido 100. 
+
+// Esto es con el circuito de proteus, que modela la impedancia del MCP3553, 
+// típica 2.4 Mohm (depende de la frecuencia de funcionamiento). Para otro ADC, 
+// o intercalando seguidores de tensión en Vin+ y Vin-, puede variar.
+
+#define pinCS   1
+#define pinMISO 4
+#define pinSCK  5
+
+#define CS_OFF  (PORTB &=~(1<<pinCS))
+#define CS_ON   (PORTB |= (1<<pinCS))
+#define CS_OUT  (DDRB |= (1<<pinCS))
+
+#define ifMISO   ( PINB   & (1<<pinMISO))
+
+#define SCK_OFF  ( PORTB &=~(1<<pinSCK) )
+#define SCK_ON   ( PORTB |= (1<<pinSCK))
+
+char TxBuff[20];
+
+void uart_init(uint32_t bps)
+{
+	UBRR0=F_CPU/16/bps-1;
+	UCSR0B|=(1<<TXEN0)|(1<<RXEN0);
+}
+
+void mi_putc(char dato)
+{
+	while(!(UCSR0A&(1<<UDRE0))){
+		_delay_us(1);
+	}
+	UDR0=dato;
+}
+
+void mi_puts(char *cadena)
+{
+	while(*cadena)
+	{
+		mi_putc(*cadena);
+		cadena++;
+	}
+}
+
+uint16_t cont = 0;
+uint32_t leeAD_MCP3550(void)
+{
+	uint32_t adcval=0;
+	CS_OFF;
+	cont = 0;
+	while (ifMISO){
+		_delay_loop_1(1);
+		cont++;
+		if(cont>500) 
+		{
+			mi_puts("e");
+			break;
+		}
+	}
+ 	//_delay_ms(100);
+	for (uint8_t ck=1;ck<=24;ck++) // se puede hacer también por la interfaz SPI
+	{
+		SCK_OFF;
+		//_delay_us(2);		
+		SCK_ON;
+		adcval=(adcval<<1);
+		if (ifMISO) adcval|=1;
+	}
+	CS_ON;
+	if(adcval&(0x200000)) // Si el número es negativo en formato de 22 bits
+	{
+		adcval |= 0xFFF00000;  // IRI
+		//adcval |= 0xFFC00000;  // Chatgpt: Extender el signo a 32 bits
+	}
+	return adcval;
+}
+
+
+int main(void)
+{
+	_delay_ms(500);
+    int32_t valADC;
+	CS_OUT;
+	DDRB |= (1<<pinSCK);
+	
+	uart_init(9600);
+	mi_puts("Hola\0");
+    while (1) 
+    {
+		mi_puts("A");
+		valADC = leeAD_MCP3550();
+		mi_puts("B");
+		if(valADC!=-1)
+		{
+			/*sprintf(TxBuff,"AD:%ld\t\t Tensión: \t%.2f V\r\n", valADC,((float)valADC)*VREF/CMAX);
+			mi_puts(TxBuff);
+			_delay_ms(100);*/
+			sprintf(TxBuff,":%.2f\r\n", ((float)valADC)*VREF/CMAX);
+			mi_puts(TxBuff);
+		}
+		else
+		{
+			printf("error\n");
+		}
+		_delay_ms(500);
+    }
+}
+
