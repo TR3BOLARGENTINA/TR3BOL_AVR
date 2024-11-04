@@ -147,10 +147,25 @@ uint8_t tryVolt = 0;
 void lecturaVoltimetro()
 {
 	valADC = leeAD_MCP3550();
+	tryVolt = 0;
+	while(valADC==-1 && tryVolt<10)
+	{
+		wdt_reset();
+		_delay_ms(100); //con 10 o 50 ms, fallaba
+		valADC = leeAD_MCP3550();
+		tryVolt++;
+		sprintf(TxBuff," -"); //descubrí al agregar print por serial
+		//mi_puts(TxBuff);
+	}
+	if(tryVolt>=10)
+	{
+		sprintf(TxBuff,"time out");
+		mi_puts(TxBuff);
+	}
 	if(valADC!=-1)
 	{
 		//------ Registro -------//
-		sprintf(TxBuff,"%d,%d,%d,", numRegistro++,numArchivo,numLinea);
+		sprintf(TxBuff,":%d,%d,%d,", numRegistro++,numArchivo,numLinea);
 		mi_puts(TxBuff);
 		
 		//------ RTC -------//
@@ -161,7 +176,7 @@ void lecturaVoltimetro()
 		//sprintf(TxBuff,"AD: %ld\r\n", valADC);
 		//mi_puts(TxBuff);
 		
-		sprintf(TxBuff,",%.3fV\r\n", Vread);
+		sprintf(TxBuff,",%.3f\r\n", Vread);
 		mi_puts(TxBuff);
 	}
 }
@@ -186,7 +201,7 @@ int main(void)
 	iniciaVariables();		wdt_reset();
 	
 	/* Configura PULSADORES */
-	//configuraInterrupcionPorCambio();	wdt_reset();	//PB0/PCINT0 	-->	P1
+	configuraInterrupcionPorCambio();	wdt_reset();	//PB0/PCINT0 	-->	P1
 														//PD5/PCINT21	-->	P2
 														//PD4/PCINT20	-->	P3
 														//PD2/PCINT18	-->	P4
@@ -195,7 +210,7 @@ int main(void)
 	
 	/* Inicialización de UART */ 
 	configuraUART(myBaudRate, 1, 0);
-	//printf("UART OK\n");
+	printf("UART OK\n");
 	//printf("\n");
 	
 	/* Inicialización de RTC */ 
@@ -210,7 +225,7 @@ int main(void)
 	//calibracion();
 	
 	estado = s_reposo;
-	//sei();
+	sei();
 		
     while (1) 
     {
@@ -218,14 +233,16 @@ int main(void)
 		{
 			case s_reposo:
 							wdt_reset();
-							lecturaVoltimetro();
-							miDelay_ms_reposo(1000);
+							//lecturaVoltimetro();
+							valADC = leeAD_MCP3550(); //mantiene vivo al ADC
+							miDelay_ms_reposo(500);
 							break;
 		    case s_pulsadores:
 							wdt_reset();
 							rutinaPulsador();
 							if(estado == s_enviaVolt)
 							{
+								buzzer_N_times(2);
 								lecturaVoltimetro();
 							}
 							estado = s_reposo;

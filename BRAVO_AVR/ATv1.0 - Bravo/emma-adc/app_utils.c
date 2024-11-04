@@ -146,13 +146,13 @@ void rutinaPulsador (void)
 		_delay_ms(2);
 		if(!P1_Test)
 		{
-			printf("P1!");
+			//printf("P1!");
 			while(!P1_Test)
 			{
 				estado = s_enviaVolt;
 				_delay_ms(10); wdt_reset();
 			}
-			printf("\n");
+			//printf("\n");
 		}
 	}
 	else if(!P2_Test)
