@@ -277,6 +277,7 @@ void leeRTC ()
 	//#ifdef UART_PC
 		//printf("%d%d%d,%d:%d",pANIO, pMES, pDIA, pHORAS,pMINUTOS);
 	//#endif
+	// CADENA " : numArchivo , numLinea , AAMMDD, HH:MM " 
 	sprintf(TxBuff,"%d%d%d,%d:%d",pANIO, pMES, pDIA, pHORAS,pMINUTOS);
 	mi_puts(TxBuff);
 }

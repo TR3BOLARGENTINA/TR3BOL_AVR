@@ -140,7 +140,7 @@ void calibracion ()
 	}
 }
 
-uint16_t numRegistro = 0;
+//uint16_t numRegistro = 0;
 uint8_t numArchivo   = 0;
 uint8_t numLinea     = 0;
 uint8_t tryVolt = 0;
@@ -164,19 +164,27 @@ void lecturaVoltimetro()
 	}
 	if(valADC!=-1)
 	{
+		// CADENA " : numArchivo , numLinea "
 		//------ Registro -------//
-		sprintf(TxBuff,":%d,%d,%d,", numRegistro++,numArchivo,numLinea);
+		numArchivo=2;
+		numLinea=6;
+		//sprintf(TxBuff,":%d,%d,%d,", numRegistro++,numArchivo,numLinea);
+		sprintf(TxBuff,":%d,%d,", numArchivo,numLinea);
 		mi_puts(TxBuff);
 		
 		//------ RTC -------//
+		// CADENA " : numArchivo , numLinea , AAMMDD, HH:MM " 
 		leeRTC();
 
 		//------ Voltimetro -------//
+		// CADENA " : numArchivo , numLinea , AAMMDD, HH:MM , V " 
 		ADC_a_Volt();
-		//sprintf(TxBuff,"AD: %ld\r\n", valADC);
-		//mi_puts(TxBuff);
-		
-		sprintf(TxBuff,",%.3f\r\n", Vread);
+		if(Vread>=100)			sprintf(TxBuff,",%.1f\r\n", Vread);
+		else if(Vread>=10 )		sprintf(TxBuff,",%.2f\r\n", Vread);
+		else if(Vread>=0.5)		sprintf(TxBuff,",%.3f\r\n", Vread);
+		if(Vread<=-100)			sprintf(TxBuff,",%.1f\r\n", Vread);
+		else if(Vread<=-10 )	sprintf(TxBuff,",%.2f\r\n", Vread);
+		else if(Vread<=-0.5)	sprintf(TxBuff,",%.3f\r\n", Vread);
 		mi_puts(TxBuff);
 	}
 }
@@ -244,6 +252,12 @@ int main(void)
 							{
 								buzzer_N_times(2);
 								lecturaVoltimetro();
+							}
+							else if (estado == s_Param)
+							{
+								buzzer_N_times(1);
+								sprintf(TxBuff,":P%d\n", pulsadorNum);
+								mi_puts(TxBuff);
 							}
 							estado = s_reposo;
 							habilitaPulsadores();

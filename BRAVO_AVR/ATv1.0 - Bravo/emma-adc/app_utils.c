@@ -146,13 +146,11 @@ void rutinaPulsador (void)
 		_delay_ms(2);
 		if(!P1_Test)
 		{
-			//printf("P1!");
 			while(!P1_Test)
 			{
 				estado = s_enviaVolt;
 				_delay_ms(10); wdt_reset();
 			}
-			//printf("\n");
 		}
 	}
 	else if(!P2_Test)
@@ -160,7 +158,8 @@ void rutinaPulsador (void)
 		_delay_ms(2);
 		if(!P2_Test)
 		{
-			printf("P2!");
+			estado = s_Param;
+			pulsadorNum = 2;
 			while(!P2_Test)
 			{
 				_delay_ms(10); wdt_reset();
@@ -172,7 +171,8 @@ void rutinaPulsador (void)
 		_delay_ms(2);
 		if(!P3_Test)
 		{
-			printf("P3!");
+			estado = s_Param;
+			pulsadorNum = 3;
 			while(!P3_Test)
 			{
 				_delay_ms(10);	wdt_reset();
@@ -184,7 +184,8 @@ void rutinaPulsador (void)
 		_delay_ms(2);
 		if(!P4_Test)
 		{
-			printf("P4!");
+			estado = s_Param;
+			pulsadorNum = 4;
 			while(!P4_Test)
 			{
 				_delay_ms(10);  wdt_reset();

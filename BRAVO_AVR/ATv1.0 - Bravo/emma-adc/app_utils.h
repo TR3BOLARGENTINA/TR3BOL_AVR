@@ -67,9 +67,10 @@
 	//#define buzzer_Toggle	(buzzer_OFF)
 	
 	//-----Modo 0: apagado, 1: purga, 2: timer, 3: configuraTimer, 4: enclavado, 5: accessPoint 1, 6: accessPoint 2
-	enum tEstado {s_reposo, s_enviaVolt, s_pulsadores};
+	enum tEstado {s_reposo, s_enviaVolt, s_Param, s_pulsadores};
 	volatile enum tEstado estado;
 		
+	volatile uint8_t pulsadorNum;
 	
 	volatile uint16_t centenas, decenas, unidades; 
 	
