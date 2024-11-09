@@ -179,12 +179,13 @@ void lecturaVoltimetro()
 		//------ Voltimetro -------//
 		// CADENA " : numArchivo , numLinea , AAMMDD, HH:MM , V " 
 		ADC_a_Volt();
-		if(Vread>=100)			sprintf(TxBuff,",%.1f\r\n", Vread);
+		sprintf(TxBuff,",%.3f\r\n", Vread);
+		/*if(Vread>=100)			sprintf(TxBuff,",%.1f\r\n", Vread);
 		else if(Vread>=10 )		sprintf(TxBuff,",%.2f\r\n", Vread);
 		else if(Vread>=0.5)		sprintf(TxBuff,",%.3f\r\n", Vread);
 		if(Vread<=-100)			sprintf(TxBuff,",%.1f\r\n", Vread);
 		else if(Vread<=-10 )	sprintf(TxBuff,",%.2f\r\n", Vread);
-		else if(Vread<=-0.5)	sprintf(TxBuff,",%.3f\r\n", Vread);
+		else if(Vread<=-0.5)	sprintf(TxBuff,",%.3f\r\n", Vread);*/
 		mi_puts(TxBuff);
 	}
 }

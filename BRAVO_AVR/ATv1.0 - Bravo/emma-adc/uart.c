@@ -43,7 +43,7 @@ void mi_puts(char *c)
 	//printf("\r\n");
 }
 
-void uart_send_string(uint8_t *c)
+/*void uart_send_string(uint8_t *c)
 {
 	for(uint8_t i=0; i<64; i++)
 	{
@@ -58,7 +58,7 @@ void uart_send_string(uint8_t *c)
 		}
 	}
 	printf("\r\n");
-}
+}*/
 // Declara un parámetro tipo stream de E/S para igualar los parámetros en stdio
 FILE uart_io = FDEV_SETUP_STREAM(mi_putc, mi_getc, _FDEV_SETUP_RW);
 

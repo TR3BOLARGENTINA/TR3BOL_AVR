@@ -32,7 +32,7 @@ char TxBuff[30];
 
 int mi_putc(char c, FILE *stream);
 int mi_getc(FILE *stream);
-void uart_send_string(uint8_t *c);
+//void uart_send_string(uint8_t *c);
 void mi_puts(char *cadena);
 
 // Redefinimos las primitivas de E/S para recibir/transmitir caracteres por UART
