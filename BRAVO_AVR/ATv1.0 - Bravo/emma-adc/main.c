@@ -28,11 +28,15 @@ uint32_t leeAD_MCP3550(void)
 {
 	uint32_t adcval=0;
 	CS_OFF;
-	
+	//sprintf(TxBuff,"aa\r\n");
+	//mi_puts(TxBuff);
 	while (ifMISO){
 		_delay_loop_1(1);
 	}
- 	//_delay_ms(100);
+	_delay_ms(1);
+	//sprintf(TxBuff,"bb\r\n");
+	//mi_puts(TxBuff);
+ 	
 
 	for (uint8_t ck=1;ck<=24;ck++) // se puede hacer también por la interfaz SPI
 	{
@@ -235,16 +239,41 @@ int main(void)
 	
 	estado = s_reposo;
 	sei();
-		
+	uint8_t try = 0;
     while (1) 
     {
 		switch(estado)
 		{
 			case s_reposo:
+							//sprintf(TxBuff,"loop %d\r\n", countLoop++);
+							//mi_puts(TxBuff);
+							
 							wdt_reset();
 							//lecturaVoltimetro();
 							valADC = leeAD_MCP3550(); //mantiene vivo al ADC
-							miDelay_ms_reposo(500);
+							
+							try = 0;
+							while(valADC==-1 && tryVolt<10 && estado == s_reposo)
+							{
+								wdt_reset();
+								//_delay_ms(100); //con 10 o 50 ms, fallaba
+								miDelay_ms_reposo(100);
+								if(estado == s_reposo) valADC = leeAD_MCP3550();
+								try++;
+							}
+							if(try>=10)
+							{
+								if(estado == s_reposo) sprintf(TxBuff,"time out");
+								if(estado == s_reposo) mi_puts(TxBuff);
+							}
+							if(valADC!=-1)
+							{
+								if(estado == s_reposo) ADC_a_Volt();
+								if(estado == s_reposo) sprintf(TxBuff,":;%.3f\r\n", Vread);
+								if(estado == s_reposo) mi_puts(TxBuff);
+							}
+							
+							miDelay_ms_reposo(1000);
 							break;
 		    case s_pulsadores:
 							wdt_reset();

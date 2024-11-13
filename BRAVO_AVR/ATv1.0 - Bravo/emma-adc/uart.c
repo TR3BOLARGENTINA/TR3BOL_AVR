@@ -38,6 +38,11 @@ void mi_puts(char *c)
 		else
 		{
 			printf("%c",c[i]); //uart_send_byte(c[i]);
+			
+			//mi_putc(c[i]);
+			
+			//sprintf(TxBuff,"%c", c[i]);
+			//mi_puts(TxBuff);
 		}
 	}
 	//printf("\r\n");
