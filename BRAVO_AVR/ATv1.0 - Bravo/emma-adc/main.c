@@ -172,7 +172,6 @@ void lecturaVoltimetro()
 		//------ Registro -------//
 		numArchivo=2;
 		numLinea=6;
-		//sprintf(TxBuff,":%d,%d,%d,", numRegistro++,numArchivo,numLinea);
 		sprintf(TxBuff,":%d,%d,", numArchivo,numLinea);
 		mi_puts(TxBuff);
 		
@@ -282,6 +281,7 @@ int main(void)
 							{
 								buzzer_N_times(2);
 								lecturaVoltimetro();
+								_delay_ms(1000); wdt_reset();
 							}
 							else if (estado == s_Param)
 							{
